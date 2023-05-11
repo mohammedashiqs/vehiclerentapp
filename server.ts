@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import bookingRouter from "./src/routes/booking"
 
 const app:express.Application = express()
+app.use(express.json())
 dotenv.config()
 const dbUrl: string | undefined = process.env.MONGODB_URL
 
