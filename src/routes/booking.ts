@@ -3,6 +3,9 @@ import {body, validationResult} from 'express-validator'
 import {IUser} from '../user/models/IUser'
 import User from "../user/models/userModel"
 import jwt from "jsonwebtoken"
+import TokenVerifier from '../middlewares/token'
+import Wheel from '../wheel/models/wheelModel'
+import { IWheel } from '../wheel/models/IWheel'
 
 const bookingRouter: express.Router = express.Router();
 
@@ -72,37 +75,40 @@ bookingRouter.post('/register', [
 
 
 
-bookingRouter.get('/wheels', (req:express.Request, res:express.Response)=>{
+bookingRouter.get('/wheels', TokenVerifier, async (req:express.Request, res:express.Response)=>{
     console.log(req);
 
 
     try{
-        res.status(200).json({
-            msg: "wheels fetched successfully"
-        })
+        let requestedUser: any = req.headers['user'];
+        let user:IUser | null = await User.findById(requestedUser.id)
+        if(!user){
+            return res.status(400).json({
+                errors: [
+                    {
+                        msg: 'User data not found'
+                    }
+                ]
+            })
+        }
 
-    }catch(err){
-        console.log(err);
-        res.status(500).json({
-            errors:[
-                {
-                    msg: err
-                }
-            ]
-        })
+        let wheels:IWheel[] | null = await Wheel.find()
+        if(!wheels){
+            res.status(400).json({
+                errors: [
+                    {
+                        msg: 'wheels not found'
+                    }
+                ]
+            })
+        }
+
         
-    }
 
-})
-
-
-bookingRouter.get('/wheels', (req:express.Request, res:express.Response)=>{
-    console.log(req);
-
-
-    try{
         res.status(200).json({
-            msg: "wheels fetched successfully"
+            msg: "wheels fetched successfully",
+            wheels: wheels
+            
         })
 
     }catch(err){

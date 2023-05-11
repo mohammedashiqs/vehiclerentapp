@@ -15,7 +15,9 @@ let TokenVerifier = async (req: express.Request, res: express.Response, next: ex
             let decode: any =  jwt.verify(token, secretKey)
 
             req.headers['user'] = decode.user
+            next()
         }
+        
 
     }catch(err){
 
