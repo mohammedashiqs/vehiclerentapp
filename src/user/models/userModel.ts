@@ -1,5 +1,5 @@
 import mongoose, {Schema, Model} from "mongoose";
-import {IUser} from './Iuser'
+import {IUser} from './IUser'
 
 
 let userSchema: Schema = new mongoose.Schema({
