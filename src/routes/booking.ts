@@ -19,6 +19,10 @@ bookingRouter.post('/register', [
 
     try{
         let {firstName, lastName} = req.body
+
+        //check the user is exists
+        //register the user
+
         res.status(200).json({
             msg: "user added successfully"
         })
