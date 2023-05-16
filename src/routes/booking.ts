@@ -6,8 +6,12 @@ import jwt from "jsonwebtoken"
 import TokenVerifier from '../middlewares/token'
 import Wheel from '../wheel/models/wheelModel'
 import { IWheel } from '../wheel/models/IWheel'
-import Vehicle from '../wheel copy/models/vehicleModel'
-import { IVehicle } from '../wheel copy/models/IVehicle'
+// import Vehicle from '../wheel copy/models/vehicleModel'
+// import { IVehicle } from '../wheel copy/models/IVehicle'
+import VehicleMaster from '../vehicleMaster/models/vehicleMasterModel'
+import { IVehicleMaster } from '../vehicleMaster/models/IVehicleMaster'
+import Booking from '../vehicleMaster copy/models/bookingMode'
+import { IBooking } from '../vehicleMaster copy/models/IBooking'
 
 const bookingRouter: express.Router = express.Router();
 
@@ -156,15 +160,17 @@ bookingRouter.get('/wheels', TokenVerifier, async (req: express.Request, res: ex
                     }
                 ]
             })
+        } else {
+            res.status(200).json({
+                msg: "wheels fetched successfully",
+                wheels: wheels
+
+            })
         }
 
 
 
-        res.status(200).json({
-            msg: "wheels fetched successfully",
-            wheels: wheels
 
-        })
 
     } catch (err) {
         console.log(err);
@@ -207,7 +213,7 @@ bookingRouter.get('/vehicle', TokenVerifier, async (req: express.Request, res: e
         if (req.query && req.query.wheels) {
             filter = req.query.wheels == "2" ? { "vehicle": { $in: ["scooter", "bike"] } } : req.query.wheels == "4" ? { "vehicle": { $in: ["car"] } } : {}
 
-            let vehicles: IVehicle[] | null = await Vehicle.find(filter)
+            let vehicles = "" /* : IVehicle[] | null = await Vehicle.find(filter) */
             if (vehicles.length == 0) {
                 res.status(400).json({
                     errors: [
@@ -217,13 +223,13 @@ bookingRouter.get('/vehicle', TokenVerifier, async (req: express.Request, res: e
                     ]
                 })
             }
-    
-    
-    
+
+
+
             res.status(200).json({
                 msg: "vehicles fetched successfully",
                 vehicles: vehicles
-    
+
             })
 
 
@@ -237,7 +243,7 @@ bookingRouter.get('/vehicle', TokenVerifier, async (req: express.Request, res: e
             })
         }
 
-       
+
 
     } catch (err) {
         console.log(err);
@@ -260,14 +266,64 @@ bookingRouter.get('/vehicle', TokenVerifier, async (req: express.Request, res: e
 
 
 
-bookingRouter.get('/type', (req: express.Request, res: express.Response) => {
-    console.log(req);
+bookingRouter.get('/type', TokenVerifier, async (req: express.Request, res: express.Response) => {
+
 
 
     try {
-        res.status(200).json({
-            msg: "types fetched successfully"
-        })
+        let requestedUser: any = req.headers['user'];
+        let user: IUser | null = await User.findById(requestedUser.id)
+        if (!user) {
+            return res.status(400).json({
+                errors: [
+                    {
+                        msg: 'User data not found'
+                    }
+                ]
+            })
+        }
+
+        let filter: {}
+
+
+        if (req.query && req.query.vehicle) {
+            filter = req.query
+
+
+            let vehicles: IVehicleMaster[] | null = await VehicleMaster.find(filter)
+            if (vehicles.length == 0) {
+                res.status(400).json({
+                    errors: [
+                        {
+                            msg: 'vehicles not found'
+                        }
+                    ]
+                })
+            }
+
+            console.log(vehicles);
+
+
+
+
+            res.status(200).json({
+                msg: "vehicles fetched successfully",
+                vehicles: vehicles
+
+            })
+
+
+        } else {
+            res.status(400).json({
+                errors: [
+                    {
+                        msg: 'wheel count is required'
+                    }
+                ]
+            })
+        }
+
+
 
     } catch (err) {
         console.log(err);
@@ -285,14 +341,70 @@ bookingRouter.get('/type', (req: express.Request, res: express.Response) => {
 
 
 
-bookingRouter.get('/model', (req: express.Request, res: express.Response) => {
-    console.log(req);
+
+
+bookingRouter.get('/model', TokenVerifier, async (req: express.Request, res: express.Response) => {
+
 
 
     try {
-        res.status(200).json({
-            msg: "model added successfully"
-        })
+        let requestedUser: any = req.headers['user'];
+        let user: IUser | null = await User.findById(requestedUser.id)
+        if (!user) {
+            return res.status(400).json({
+                errors: [
+                    {
+                        msg: 'User data not found'
+                    }
+                ]
+            })
+        }
+
+        let filter: {}
+
+
+        if (req.query && req.query.vehicle && req.query.type) {
+            filter = req.query
+            console.log(filter);
+
+
+
+            let vehicles: IVehicleMaster[] | null = await VehicleMaster.find(filter)
+            if (vehicles.length == 0) {
+                res.status(400).json({
+                    errors: [
+                        {
+                            msg: 'model not found'
+                        }
+                    ]
+                })
+            } else {
+
+
+                res.status(200).json({
+                    msg: "vehicles fetched successfully",
+                    vehicles: vehicles
+
+                })
+
+
+            }
+
+
+
+
+
+        } else {
+            res.status(400).json({
+                errors: [
+                    {
+                        msg: 'Vehicle or type is required'
+                    }
+                ]
+            })
+        }
+
+
 
     } catch (err) {
         console.log(err);
@@ -311,14 +423,54 @@ bookingRouter.get('/model', (req: express.Request, res: express.Response) => {
 
 
 
-bookingRouter.post('/dates', (req: express.Request, res: express.Response) => {
-    console.log(req);
+bookingRouter.post('/dates', TokenVerifier, async (req: express.Request, res: express.Response) => {
+
 
 
     try {
-        res.status(200).json({
-            msg: "dates added successfully"
-        })
+        let requestedUser: any = req.headers['user'];
+        let user: IUser | null = await User.findById(requestedUser.id)
+        if (!user) {
+            return res.status(400).json({
+                errors: [
+                    {
+                        msg: 'User data not found'
+                    }
+                ]
+            })
+        }
+
+        
+
+        if (req.query && req.query.modelId && req.query.fromDate && req.query.toDate) {
+
+
+            let booking: IBooking | null = await Booking.findByIdAndUpdate(user._id, req.query, {
+                upsert: true
+            })
+
+            
+            res.status(500).json({
+                errors: [
+                    {
+                        msg: "booked Sucessfully"
+                    }
+                ]
+            })
+
+
+
+        } else {
+            res.status(400).json({
+                errors: [
+                    {
+                        msg: 'Dates are required'
+                    }
+                ]
+            })
+        }
+
+
 
     } catch (err) {
         console.log(err);
@@ -333,7 +485,6 @@ bookingRouter.post('/dates', (req: express.Request, res: express.Response) => {
     }
 
 })
-
 
 
 export default bookingRouter
